@@ -1,4 +1,10 @@
 import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import {
   ArrowLeftRight,
   Check,
   Copy,
@@ -22,6 +28,8 @@ const UNISWAP_SWAP_URL = `https://app.uniswap.org/swap?inputCurrency=ETH&outputC
 const TELEGRAM_URL = "https://t.me/firstxeth";
 const X_URL = "https://x.com/firstxeth";
 
+const TICKER_HEIGHT = 32;
+
 const navLinks = [
   { label: "About", href: "#about" },
   { label: "How to Buy", href: "#how-to-buy" },
@@ -29,6 +37,7 @@ const navLinks = [
   { label: "Tokenomics", href: "#tokenomics" },
   { label: "Memes", href: "#memes" },
   { label: "Chart", href: "#chart" },
+  { label: "FAQ", href: "#faq" },
 ];
 
 const howToBuySteps = [
@@ -69,6 +78,89 @@ const tokenomics = [
   { label: "Chain", value: "Ethereum", sub: "ETH network" },
 ];
 
+const memes = [
+  {
+    src: "/assets/generated/meme-rocket.dim_300x300.jpg",
+    alt: "X to the Moon",
+  },
+  { src: "/assets/generated/meme-elon.dim_300x300.jpg", alt: "Elon X" },
+  { src: "/assets/generated/meme-pepe.dim_300x300.jpg", alt: "Pepe X Army" },
+];
+
+const memeCubes = Array.from({ length: 24 }, (_, i) => ({
+  ...memes[i % 3],
+  cubeId: `cube-${i}`,
+}));
+
+const faqItems = [
+  {
+    id: "what-is-x",
+    q: "What is $X?",
+    a: "$X is a memecoin built on Ethereum, inspired by Elon Musk's iconic Twitter-to-X rebrand. Pure meme energy, zero taxes.",
+  },
+  {
+    id: "where-to-buy",
+    q: "Where can I buy $X?",
+    a: "You can buy $X on Uniswap. Simply swap ETH for $X using our contract address. Use the Swap section on this page for direct access.",
+  },
+  {
+    id: "is-safe",
+    q: "Is $X safe to buy?",
+    a: "Liquidity is permanently locked and the contract has 0% buy/sell tax. Always DYOR — $X is a memecoin, not an investment.",
+  },
+  {
+    id: "contract-address",
+    q: "What is the contract address?",
+    a: "0xA0F48CB0CDe07D336CEC707f6F1e18a6FfcFB0D6 on the Ethereum network.",
+  },
+  {
+    id: "total-supply",
+    q: "What is the total supply?",
+    a: "1,000,000,000 $X tokens. Fixed supply, no minting.",
+  },
+  {
+    id: "which-chain",
+    q: "What chain is $X on?",
+    a: "Ethereum mainnet (ETH).",
+  },
+  {
+    id: "taxes",
+    q: "Does $X have any taxes?",
+    a: "No. 0% buy tax and 0% sell tax. What you swap is what you get.",
+  },
+];
+
+const tickerItems = [
+  {
+    id: "price",
+    label: "$X / ETH",
+    value: "0.000042",
+    change: "+5.2%",
+    up: true,
+  },
+  { id: "mcap", label: "MARKET CAP", value: "$4.2M", change: null, up: null },
+  { id: "volume", label: "24H VOLUME", value: "$820K", change: null, up: null },
+  { id: "holders", label: "HOLDERS", value: "3,200", change: null, up: null },
+  { id: "tx1", label: "TX: BUY", value: "0.15 ETH", change: null, up: true },
+  { id: "tx2", label: "TX: BUY", value: "0.42 ETH", change: null, up: true },
+  {
+    id: "change24h",
+    label: "24H CHANGE",
+    value: "+12.4%",
+    change: null,
+    up: true,
+  },
+  {
+    id: "ath",
+    label: "ALL TIME HIGH",
+    value: "$0.0000892",
+    change: null,
+    up: null,
+  },
+  { id: "liq", label: "LIQUIDITY", value: "LOCKED 🔒", change: null, up: null },
+  { id: "tax", label: "TAX", value: "0%", change: null, up: true },
+];
+
 export default function App() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -88,14 +180,51 @@ export default function App() {
 
   return (
     <div className="min-h-screen star-bg font-body">
+      {/* ===== LIVE PRICE TICKER ===== */}
+      <div
+        className="fixed top-0 left-0 right-0 z-50 overflow-hidden"
+        style={{
+          height: `${TICKER_HEIGHT}px`,
+          background: "oklch(0.05 0 0)",
+          borderBottom: "1px solid oklch(0.2 0 0)",
+        }}
+      >
+        <div className="ticker-scroll h-full flex items-center">
+          {[...tickerItems, ...tickerItems].map((item, idx) => (
+            <span
+              key={`${item.id}-${idx}`}
+              className="font-orbitron text-[10px] tracking-wider flex items-center gap-1.5 px-4 flex-shrink-0"
+            >
+              <span className="text-muted-foreground">{item.label}:</span>
+              <span className="text-white font-bold">{item.value}</span>
+              {item.change && (
+                <span
+                  style={{
+                    color: item.up
+                      ? "oklch(0.75 0.18 145)"
+                      : "oklch(0.65 0.22 25)",
+                  }}
+                >
+                  {item.change}
+                </span>
+              )}
+              {item.up === true && !item.change && (
+                <span style={{ color: "oklch(0.75 0.18 145)" }}>▲</span>
+              )}
+              <span className="text-muted-foreground opacity-40 ml-2">·</span>
+            </span>
+          ))}
+        </div>
+      </div>
+
       {/* ===== STICKY NAV ===== */}
       <header
-        className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        className={`fixed left-0 right-0 z-40 transition-all duration-300 ${
           scrolled ? "glass-nav" : "bg-transparent"
         }`}
+        style={{ top: `${TICKER_HEIGHT}px` }}
       >
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          {/* Logo */}
           <a
             href="#hero"
             className="flex items-center gap-2 group"
@@ -110,7 +239,7 @@ export default function App() {
           </a>
 
           {/* Desktop Nav */}
-          <ul className="hidden md:flex items-center gap-6">
+          <ul className="hidden md:flex items-center gap-5">
             {navLinks.map((link) => (
               <li key={link.href}>
                 <a
@@ -124,7 +253,6 @@ export default function App() {
             ))}
           </ul>
 
-          {/* Buy CTA */}
           <div className="hidden md:flex items-center gap-3">
             <a
               href={UNISWAP_URL}
@@ -137,7 +265,6 @@ export default function App() {
             </a>
           </div>
 
-          {/* Mobile toggle */}
           <button
             type="button"
             className="md:hidden text-foreground p-2"
@@ -160,14 +287,14 @@ export default function App() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden glass-nav border-t border-border px-4 pb-4"
+              className="md:hidden glass-nav border-t border-border px-4 pb-6"
             >
-              <ul className="flex flex-col gap-3 pt-3">
+              <ul className="flex flex-col gap-1 pt-3">
                 {navLinks.map((link) => (
                   <li key={link.href}>
                     <a
                       href={link.href}
-                      className="font-orbitron text-xs tracking-widest text-muted-foreground hover:text-white transition-colors block py-1"
+                      className="font-orbitron text-sm tracking-widest text-muted-foreground hover:text-white transition-colors block py-3 border-b border-border/40"
                       onClick={() => setMobileOpen(false)}
                       data-ocid="nav.link"
                     >
@@ -175,12 +302,12 @@ export default function App() {
                     </a>
                   </li>
                 ))}
-                <li>
+                <li className="pt-3">
                   <a
                     href={UNISWAP_URL}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn-cyan inline-block px-5 py-2 rounded-full text-xs mt-2"
+                    className="btn-cyan inline-block px-5 py-3 rounded-full text-xs"
                     data-ocid="nav.primary_button"
                   >
                     BUY $X
@@ -195,59 +322,30 @@ export default function App() {
       {/* ===== HERO ===== */}
       <section
         id="hero"
-        className="min-h-screen flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 pt-20 pb-12 relative overflow-hidden"
+        className="min-h-[65vh] flex flex-col items-center justify-center text-center px-4 sm:px-6 lg:px-8 relative overflow-hidden"
+        style={{
+          paddingTop: `${TICKER_HEIGHT + 64 + 32}px`,
+          paddingBottom: "3rem",
+        }}
       >
-        {/* X Logo (uploaded) */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className="mb-6 animate-float"
+          className="mb-8 animate-float"
         >
           <img
             src="/assets/uploads/img_3950-019d269d-ceed-7069-8867-b6a8d29af4e9-1.jpeg"
             alt="X Token Logo"
-            className="w-32 h-32 md:w-48 md:h-48 object-contain rounded-2xl"
+            className="w-28 h-28 md:w-40 md:h-40 object-contain rounded-2xl"
           />
         </motion.div>
 
-        {/* Headline */}
-        <motion.h1
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-          className="font-orbitron font-black text-4xl md:text-6xl lg:text-8xl tracking-tight mb-4"
-        >
-          <span className="gradient-text">THE PLATFORM</span>
-          <br />
-          <span className="text-white animate-pulse-glow">PUMP.</span>
-        </motion.h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.4 }}
-          className="font-orbitron text-lg md:text-2xl tracking-widest text-muted-foreground mb-2"
-        >
-          PURE HYPE. PURE X.
-        </motion.p>
-
-        <motion.p
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.5 }}
-          className="font-body text-muted-foreground text-base md:text-lg max-w-md mb-10"
-        >
-          The memecoin cashing in on the biggest brand shift in internet
-          history.
-        </motion.p>
-
-        {/* CTA Buttons */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.6 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center items-center"
+          transition={{ duration: 0.7, delay: 0.3 }}
+          className="flex flex-col sm:flex-row gap-4 justify-center items-center w-full max-w-md sm:max-w-none"
         >
           <a
             href={DEXSCREENER_LINK}
@@ -280,26 +378,6 @@ export default function App() {
             JOIN TG
           </a>
         </motion.div>
-
-        {/* Scroll indicator */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 1.2, duration: 0.8 }}
-          className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1"
-        >
-          <span className="font-orbitron text-xs tracking-widest text-muted-foreground">
-            SCROLL
-          </span>
-          <motion.div
-            animate={{ y: [0, 6, 0] }}
-            transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
-            className="w-px h-8"
-            style={{
-              background: "linear-gradient(to bottom, white, transparent)",
-            }}
-          />
-        </motion.div>
       </section>
 
       {/* ===== NARRATIVE / ABOUT ===== */}
@@ -314,7 +392,6 @@ export default function App() {
             <h2 className="font-orbitron font-bold text-3xl md:text-4xl text-center tracking-widest mb-12 gradient-text">
               NARRATIVE
             </h2>
-
             <div className="neon-card p-8 md:p-12 flex flex-col md:flex-row gap-8 items-start">
               <div
                 className="flex-shrink-0 flex items-center justify-center w-16 h-16 rounded-full"
@@ -360,7 +437,6 @@ export default function App() {
           >
             HOW TO BUY
           </motion.h2>
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {howToBuySteps.map((step, i) => (
               <motion.div
@@ -395,7 +471,6 @@ export default function App() {
               </motion.div>
             ))}
           </div>
-
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -428,7 +503,6 @@ export default function App() {
           >
             SWAP $X
           </motion.h2>
-
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -468,7 +542,6 @@ export default function App() {
           >
             TOKENOMICS
           </motion.h2>
-
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
             {tokenomics.map((item, i) => (
               <motion.div
@@ -506,7 +579,6 @@ export default function App() {
           >
             LIVE CHART
           </motion.h2>
-
           <motion.div
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -531,7 +603,7 @@ export default function App() {
         </div>
       </section>
 
-      {/* ===== MEME GALLERY ===== */}
+      {/* ===== MEME GALLERY — small cubes ===== */}
       <section id="memes" className="py-24 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto">
           <motion.h2
@@ -542,53 +614,73 @@ export default function App() {
           >
             MEMES
           </motion.h2>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-            {[
-              {
-                src: "/assets/generated/meme-rocket.dim_300x300.jpg",
-                alt: "X to the Moon",
-              },
-              {
-                src: "/assets/generated/meme-elon.dim_300x300.jpg",
-                alt: "Elon X",
-              },
-              {
-                src: "/assets/generated/meme-pepe.dim_300x300.jpg",
-                alt: "Pepe X Army",
-              },
-            ].map((meme, i) => (
-              <motion.div
-                key={meme.alt}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: i * 0.15 }}
-                className="neon-card overflow-hidden group cursor-pointer"
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-1.5"
+          >
+            {memeCubes.map((meme, i) => (
+              <div
+                key={meme.cubeId}
+                className="aspect-square rounded-md overflow-hidden cursor-pointer group"
                 data-ocid={`memes.item.${i + 1}`}
               >
                 <img
                   src={meme.src}
                   alt={meme.alt}
-                  className="w-full aspect-square object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                 />
-              </motion.div>
+              </div>
             ))}
-          </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ===== FAQ ===== */}
+      <section id="faq" className="py-24 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-3xl mx-auto">
+          <motion.h2
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="font-orbitron font-bold text-3xl md:text-4xl text-center tracking-widest mb-12 gradient-text"
+          >
+            FAQ
+          </motion.h2>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7 }}
+            className="neon-card p-4"
+            data-ocid="faq.panel"
+          >
+            <Accordion type="single" collapsible className="w-full">
+              {faqItems.map((item) => (
+                <AccordionItem key={item.id} value={item.id}>
+                  <AccordionTrigger className="font-orbitron text-xs sm:text-sm tracking-wider text-white hover:no-underline px-4">
+                    {item.q}
+                  </AccordionTrigger>
+                  <AccordionContent className="font-body text-sm text-muted-foreground leading-relaxed px-4">
+                    {item.a}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </motion.div>
         </div>
       </section>
 
       {/* ===== FOOTER ===== */}
       <footer className="py-16 px-4 sm:px-6 lg:px-8 border-t border-border">
         <div className="max-w-4xl mx-auto flex flex-col items-center gap-6 text-center">
-          {/* Logo */}
           <img
             src="/assets/uploads/img_3950-019d269d-ceed-7069-8867-b6a8d29af4e9-1.jpeg"
             alt="X Logo"
             className="w-12 h-12 object-contain rounded-lg"
           />
-
-          {/* Contract Address */}
           <div className="flex items-center gap-3 flex-wrap justify-center w-full">
             <span className="font-orbitron text-xs tracking-widest text-muted-foreground">
               CA:
@@ -608,9 +700,7 @@ export default function App() {
               type="button"
               onClick={copyCA}
               className="p-2 rounded-lg transition-all hover:scale-110 flex-shrink-0"
-              style={{
-                color: copied ? "white" : "oklch(0.55 0 0)",
-              }}
+              style={{ color: copied ? "white" : "oklch(0.55 0 0)" }}
               title="Copy contract address"
               data-ocid="footer.button"
             >
@@ -621,8 +711,6 @@ export default function App() {
               )}
             </button>
           </div>
-
-          {/* Social Links */}
           <div className="flex items-center gap-6">
             <a
               href={X_URL}
@@ -644,8 +732,6 @@ export default function App() {
               Telegram
             </a>
           </div>
-
-          {/* Caffeine branding */}
           <p className="font-body text-xs text-muted-foreground">
             © {new Date().getFullYear()}. Built with ❤️ using{" "}
             <a
@@ -657,8 +743,6 @@ export default function App() {
               caffeine.ai
             </a>
           </p>
-
-          {/* Disclaimer */}
           <p className="font-body text-xs text-muted-foreground max-w-lg opacity-60">
             $X is a memecoin with no intrinsic value or financial return
             expectation. This is not financial advice. DYOR.

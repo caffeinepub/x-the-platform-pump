@@ -239,4 +239,26 @@
   .animate-float {
     animation: float 4s ease-in-out infinite;
   }
+
+  /* ===== LIVE PRICE TICKER ===== */
+  @keyframes ticker-scroll {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
+  .ticker-scroll {
+    animation: ticker-scroll 30s linear infinite;
+    white-space: nowrap;
+    display: inline-flex;
+    gap: 0;
+    will-change: transform;
+  }
+
+  .ticker-scroll:hover {
+    animation-play-state: paused;
+  }
 }
